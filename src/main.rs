@@ -6,6 +6,7 @@ use serde::Serialize;
 use serde_json::Value;
 use std::collections::HashMap;
 use std::error::Error;
+use std::io;
 
 #[derive(Parser, Debug)]
 #[command(name = "Emissary-rs")]
@@ -109,7 +110,16 @@ fn prepare(message: &str) -> Result<HashMap<String, MyType>, Box<dyn Error>> {
 }
 
 fn main() {
-    let msg = "hej";
+    let args = Args::parse();
+    let msg = if let Some(value) = args.msg {
+        value // If args.msg has a value, use it
+    } else {
+        let mut input = String::new();
+        io::stdin()
+            .read_line(&mut input)
+            .expect("error taking input from stdin");
+        input.trim().to_string()
+    };
 
     match prepare(&msg) {
         Ok(jay) => {
