@@ -38,6 +38,7 @@ fn send(webhook: &str, json: HashMap<String, MyType>) -> Result<(), reqwestError
 fn prepare(message: &str) -> Result<HashMap<String, MyType>, Box<dyn Error>> {
     let conf = Ini::load_from_file("/Users/mikey/.config/emissary.ini")?;
 
+    // TODO: Perform better error handling, maybe create a new error type?
     let default_section = conf.section(Some("Default")).ok_or_else(|| {
         std::io::Error::new(std::io::ErrorKind::NotFound, "Default section not found")
     })?;
@@ -88,7 +89,7 @@ fn prepare(message: &str) -> Result<HashMap<String, MyType>, Box<dyn Error>> {
                         json.insert(key.clone(), MyType::Bool(b.clone()));
                     }
                     // Handle other types as needed, or ignore them
-                    _ => (),
+                    _ => (), // TODO: Perform better error handling
                 }
             }
         }
@@ -105,7 +106,7 @@ fn main() {
         let mut input = String::new();
         io::stdin()
             .read_line(&mut input)
-            .expect("error taking input from stdin");
+            .expect("error taking input from stdin"); // TODO: Perform better error handling
         input.trim().to_string()
     };
 
