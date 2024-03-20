@@ -8,19 +8,7 @@ use std::collections::HashMap;
 use std::error::Error;
 use std::io;
 
-#[derive(Parser, Debug)]
-#[command(name = "Emissary-rs")]
-#[command(version = "1.0")]
-#[command(version, about = "Send data through chat channels. Made by @dubs3c.", long_about = None)]
-struct Args {
-    /// Message to send
-    #[arg(short, long)]
-    msg: Option<String>,
-
-    /// Specify the field that contains the message. Default is 'message'
-    #[arg(short, long)]
-    txt: Option<String>,
-}
+mod tui;
 
 #[derive(Serialize)]
 #[serde(untagged)]
@@ -110,7 +98,7 @@ fn prepare(message: &str) -> Result<HashMap<String, MyType>, Box<dyn Error>> {
 }
 
 fn main() {
-    let args = Args::parse();
+    let args = tui::Args::parse();
     let msg = if let Some(value) = args.msg {
         value // If args.msg has a value, use it
     } else {
