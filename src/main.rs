@@ -7,6 +7,7 @@ use serde_json::Value;
 use std::collections::HashMap;
 use std::error::Error;
 use std::io;
+use std::path::PathBuf;
 
 mod tui;
 
@@ -35,8 +36,8 @@ fn send(webhook: &str, json: HashMap<String, MyType>) -> Result<(), reqwestError
     Ok(())
 }
 
-fn prepare(message: &str) -> Result<HashMap<String, MyType>, Box<dyn Error>> {
-    let conf = Ini::load_from_file("/Users/mikey/.config/emissary.ini")?;
+fn prepare(message: &str, config: PathBuf) -> Result<HashMap<String, MyType>, Box<dyn Error>> {
+    let conf = Ini::load_from_file(config)?;
 
     // TODO: Perform better error handling, maybe create a new error type?
     let default_section = conf.section(Some("Default")).ok_or_else(|| {
@@ -99,6 +100,15 @@ fn prepare(message: &str) -> Result<HashMap<String, MyType>, Box<dyn Error>> {
 }
 
 fn main() {
+    let mut config_location = PathBuf::new();
+    if let Some(home) = dirs::home_dir() {
+        let mut config_path = home;
+        config_path.push(".config/emissary.ini");
+        config_location = config_path;
+    } else {
+        eprintln!("[-] Failed getting user home folder")
+    }
+
     let args = tui::Args::parse();
     let msg = if let Some(value) = args.msg {
         value // If args.msg has a value, use it
@@ -110,7 +120,7 @@ fn main() {
         input.trim().to_string()
     };
 
-    match prepare(&msg) {
+    match prepare(&msg, config_location) {
         Ok(jay) => {
             if let Some(w) = jay.get("webhook") {
                 match send(w.to_string().as_ref(), jay) {
